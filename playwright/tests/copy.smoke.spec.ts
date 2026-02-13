@@ -47,4 +47,28 @@ test.describe("Copy smoke", () => {
       expect(clipboardAfter).toBe("");
     }
   });
+
+  test("<CopyToClipboard> works and child onClick fires", async ({
+    page,
+    context,
+    browserName,
+  }) => {
+    if (browserName === "chromium") {
+      await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    }
+    await page.goto("/");
+
+    await page.getByTestId("component-copy").click();
+
+    if (browserName === "chromium") {
+      const clipboardText = await page.evaluate(() =>
+        navigator.clipboard.readText()
+      );
+      expect(clipboardText).toBe("component-text");
+    }
+
+    await expect(
+      page.getByTestId("component-onclick-fired")
+    ).toHaveText("yes");
+  });
 });
