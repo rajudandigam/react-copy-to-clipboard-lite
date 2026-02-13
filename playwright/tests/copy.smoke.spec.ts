@@ -22,4 +22,29 @@ test.describe("Copy smoke", () => {
 
     await expect(page.getByTestId("copied-state")).toHaveText("true");
   });
+
+  test("clearAfter empties clipboard", async ({ page, context, browserName }) => {
+    if (browserName === "chromium") {
+      await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    }
+    await page.goto("/");
+
+    await page.getByTestId("hook-copy").click();
+
+    if (browserName === "chromium") {
+      let clipboardText = await page.evaluate(() =>
+        navigator.clipboard.readText()
+      );
+      expect(clipboardText).toBe("hook-text");
+    }
+
+    await page.waitForTimeout(1500);
+
+    if (browserName === "chromium") {
+      const clipboardAfter = await page.evaluate(() =>
+        navigator.clipboard.readText()
+      );
+      expect(clipboardAfter).toBe("");
+    }
+  });
 });
