@@ -3,6 +3,11 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "tests",
   fullyParallel: true,
+  webServer: {
+    command: "npm run dev:test-app",
+    url: "http://localhost:5173",
+    reuseExistingServer: !process.env.CI,
+  },
   use: {
     headless: true,
     baseURL: "http://localhost:5173",
