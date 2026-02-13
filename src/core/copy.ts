@@ -1,4 +1,5 @@
 import type { CopyResult, CopyOptions } from "./types.js";
+import { copyViaExecCommand } from "./fallback.js";
 
 export type { CopyResult, CopyOptions } from "./types.js";
 
@@ -20,8 +21,18 @@ export async function copyToClipboard(
       await clipboard.writeText(text);
       return { success: true, method: "clipboard-api" };
     } catch {
-      // Fallback tiers would go here
+      // Fall through to execCommand fallback
     }
+  }
+
+  if (typeof document !== "undefined" && document.queryCommandSupported?.("copy")) {
+    const { ok, error } = copyViaExecCommand(text);
+    if (ok) return { success: true, method: "exec-command" };
+    return {
+      success: false,
+      method: "failed",
+      error,
+    };
   }
 
   return {
