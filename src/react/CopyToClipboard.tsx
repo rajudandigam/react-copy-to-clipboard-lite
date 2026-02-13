@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { cloneElement } from "react";
-import { copyToClipboard } from "../core/copy.js";
+import { copyToClipboard } from "../core/copyToClipboard.js";
 import type { CopyResult } from "../core/types.js";
 
 export type CopyToClipboardProps = {
@@ -9,7 +9,7 @@ export type CopyToClipboardProps = {
   onCopyResult?: (r: CopyResult) => void;
   onSuccess?: (r: CopyResult) => void;
   onError?: (r: CopyResult) => void;
-  children: ReactElement;
+  children: ReactElement<{ onClick?: React.MouseEventHandler }>;
 };
 
 export function CopyToClipboard({
@@ -21,12 +21,16 @@ export function CopyToClipboard({
   children,
 }: CopyToClipboardProps): ReactElement {
   const handleClick = async (e: React.MouseEvent) => {
+    const childOnClick = (children.props as { onClick?: (ev: React.MouseEvent) => void })?.onClick;
+    childOnClick?.(e);
+
+    if (e.defaultPrevented) return;
+
     const result = await copyToClipboard(text, { clearAfter });
+
     onCopyResult?.(result);
     if (result.success) onSuccess?.(result);
     else onError?.(result);
-    const childOnClick = (children.props as { onClick?: (ev: React.MouseEvent) => void })?.onClick;
-    childOnClick?.(e);
   };
 
   return cloneElement(children, { onClick: handleClick });
