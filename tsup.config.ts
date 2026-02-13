@@ -9,9 +9,13 @@ export default defineConfig({
   format: ["esm", "cjs"],
   dts: true,
   clean: true,
-  sourcemap: true,
+  sourcemap: false,
+  minify: true,
+  treeshake: true,
+  splitting: false,
+  target: "es2020",
   outDir: "dist",
-  // ESM gets .mjs, CJS gets .cjs (tsup default for type: "module")
+  external: ["react"],
   outExtension({ format }) {
     return {
       js: format === "cjs" ? ".cjs" : ".mjs",
