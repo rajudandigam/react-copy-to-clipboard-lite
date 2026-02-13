@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { copyToClipboard } from "../core/copyToClipboard.js";
+import { copyToClipboard } from "../core/copy.js";
 import type { CopyOptions, CopyResult } from "../core/types.js";
 
 export type UseCopyToClipboardOptions = {

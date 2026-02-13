@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { cloneElement } from "react";
-import { copyToClipboard } from "../core/copyToClipboard.js";
+import { copyToClipboard } from "../core/copy.js";
 import type { CopyResult } from "../core/types.js";
 
 export type CopyToClipboardProps = {

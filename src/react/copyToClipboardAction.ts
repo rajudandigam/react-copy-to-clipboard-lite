@@ -1,4 +1,4 @@
-import { copyToClipboard } from "../core/copyToClipboard.js";
+import { copyToClipboard } from "../core/copy.js";
 import type { CopyResult } from "../core/types.js";
 
 export async function copyToClipboardAction(

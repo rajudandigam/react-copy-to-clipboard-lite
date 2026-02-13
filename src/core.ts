@@ -2,5 +2,5 @@ export {
   copyToClipboard,
   type CopyResult,
   type CopyOptions,
-} from "./core/copyToClipboard.js";
+} from "./core/copy.js";
 export type { CopyMethod, CopyErrorCode } from "./core/types.js";
