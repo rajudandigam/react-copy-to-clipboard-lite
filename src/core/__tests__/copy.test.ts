@@ -122,6 +122,30 @@ describe("copyToClipboard() core engine", () => {
     expect(result.method).toBe("exec-command");
   });
 
+  it("continues to clipboard or fallback when permissions.query throws", async () => {
+    const query = vi.fn().mockRejectedValue(new Error("Permission query unsupported"));
+
+    Object.defineProperty(global.navigator, "permissions", {
+      value: { query },
+      configurable: true,
+    });
+
+    Object.defineProperty(global.window, "isSecureContext", {
+      value: true,
+      configurable: true,
+    });
+
+    Object.defineProperty(global.navigator, "clipboard", {
+      value: { writeText: vi.fn().mockResolvedValue(undefined) },
+      configurable: true,
+    });
+
+    const result = await copyToClipboard("hello");
+
+    expect(result.success).toBe(true);
+    expect(result.method).toBe("clipboard-api");
+  });
+
   it("does not query permissions when permissions option is 'none'", async () => {
     const query = vi.fn();
 

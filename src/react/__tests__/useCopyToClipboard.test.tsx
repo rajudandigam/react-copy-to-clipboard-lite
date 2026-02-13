@@ -117,6 +117,31 @@ describe("useCopyToClipboard", () => {
       });
       expect(result.current.copied).toBe(false);
     });
+
+    it("clears previous timer when copy is called again before timeout", async () => {
+      vi.useFakeTimers();
+      vi.mocked(copyToClipboard).mockResolvedValue({
+        success: true,
+        method: "clipboard-api",
+      });
+
+      const { result } = renderHook(() => useCopyToClipboard({ timeout: 2000 }));
+
+      await act(async () => {
+        await result.current.copy("first");
+      });
+      expect(result.current.copied).toBe(true);
+
+      await act(async () => {
+        await result.current.copy("second");
+      });
+      expect(result.current.copied).toBe(true);
+
+      await act(async () => {
+        vi.advanceTimersByTime(2000);
+      });
+      expect(result.current.copied).toBe(false);
+    });
   });
 
   describe("5. Failure case", () => {

@@ -7,8 +7,25 @@ export default defineConfig({
     clearMocks: true,
     restoreMocks: true,
     coverage: {
-      reporter: ["text", "html"],
-      exclude: ["dist/", "node_modules/", "vitest.config.ts"],
+      provider: "v8",
+      reporter: ["text", "html", "lcov"],
+      reportsDirectory: "./coverage",
+      exclude: [
+        "dist/**",
+        "node_modules/**",
+        "**/*.d.ts",
+        "vitest.config.ts",
+        "src/core.ts",
+        "src/index.ts",
+        "src/react.ts",
+        "src/react/actions.ts",
+      ],
+      thresholds: {
+        statements: 95,
+        branches: 90,
+        functions: 100,
+        lines: 95,
+      },
     },
   },
 });
