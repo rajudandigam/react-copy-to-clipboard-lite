@@ -1,0 +1,9 @@
+# react-copy-to-clipboard-lite — Cursor guardrails
+
+- **TypeScript**: Use strict TypeScript. No extra runtime dependencies.
+- **Never use `prompt()`** for clipboard or any fallback.
+- **Never use clipboard-read** or restore previous clipboard content.
+- **Exec fallback**: Use only a `<textarea>`-based execCommand fallback (off-screen, select, copy, cleanup). No other exec fallback patterns.
+- **Return type**: All copy paths must return the structured `CopyResult` type (success, method, code?, error?).
+- **SSR-safe**: No access to `window` or `document` at module top-level; guard with `typeof window === 'undefined'` and run browser logic only inside functions invoked at runtime.
+- **Full context**: For API contract, engine tiers, build order, and tests, see `docs/DEV-ARCHITECTURE.md`.
