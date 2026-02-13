@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useCopyToClipboard } from "../useCopyToClipboard";
 import { copyToClipboard } from "../../core/copy.js";
@@ -12,140 +12,233 @@ describe("useCopyToClipboard", () => {
     vi.mocked(copyToClipboard).mockReset();
   });
 
-  it("returns copy, copied, error, reset", () => {
-    vi.mocked(copyToClipboard).mockResolvedValue({
-      success: true,
-      method: "clipboard-api",
-    });
-
-    const { result } = renderHook(() => useCopyToClipboard());
-
-    expect(result.current).toHaveProperty("copy");
-    expect(result.current).toHaveProperty("copied");
-    expect(result.current).toHaveProperty("error");
-    expect(result.current).toHaveProperty("reset");
-    expect(typeof result.current.copy).toBe("function");
-    expect(typeof result.current.reset).toBe("function");
-    expect(result.current.copied).toBe(false);
-    expect(result.current.error).toBe(null);
-  });
-
-  it("sets copied to true on success and forwards options to engine", async () => {
-    vi.mocked(copyToClipboard).mockResolvedValue({
-      success: true,
-      method: "clipboard-api",
-    });
-
-    const { result } = renderHook(() =>
-      useCopyToClipboard({ timeout: 2000, clearAfter: 500, permissions: "none" })
-    );
-
-    await act(async () => {
-      await result.current.copy("hello");
-    });
-
-    expect(copyToClipboard).toHaveBeenCalledWith("hello", {
-      clearAfter: 500,
-      permissions: "none",
-    });
-    expect(result.current.copied).toBe(true);
-    expect(result.current.error).toBe(null);
-  });
-
-  it("sets error on failure", async () => {
-    const err = new Error("copy failed");
-    vi.mocked(copyToClipboard).mockResolvedValue({
-      success: false,
-      method: "failed",
-      error: err,
-    });
-
-    const { result } = renderHook(() => useCopyToClipboard());
-
-    await act(async () => {
-      await result.current.copy("hello");
-    });
-
-    expect(result.current.copied).toBe(false);
-    expect(result.current.error).toBe(err);
-  });
-
-  it("reset clears copied and error", async () => {
-    vi.mocked(copyToClipboard).mockResolvedValue({
-      success: true,
-      method: "clipboard-api",
-    });
-
-    const { result } = renderHook(() => useCopyToClipboard());
-
-    await act(async () => {
-      await result.current.copy("hello");
-    });
-    expect(result.current.copied).toBe(true);
-
-    act(() => {
-      result.current.reset();
-    });
-    expect(result.current.copied).toBe(false);
-    expect(result.current.error).toBe(null);
-  });
-
-  it("resets copied after timeout", async () => {
-    vi.useFakeTimers();
-    vi.mocked(copyToClipboard).mockResolvedValue({
-      success: true,
-      method: "clipboard-api",
-    });
-
-    const { result } = renderHook(() => useCopyToClipboard({ timeout: 1000 }));
-
-    await act(async () => {
-      await result.current.copy("hello");
-    });
-    expect(result.current.copied).toBe(true);
-
-    act(() => {
-      vi.advanceTimersByTime(1000);
-    });
-    expect(result.current.copied).toBe(false);
-
+  afterEach(() => {
     vi.useRealTimers();
   });
 
-  it("copy override options merge with hook options", async () => {
-    vi.mocked(copyToClipboard).mockResolvedValue({
-      success: true,
-      method: "clipboard-api",
-    });
+  describe("1. Initial state", () => {
+    it("has copied false and error null", () => {
+      vi.mocked(copyToClipboard).mockResolvedValue({
+        success: true,
+        method: "clipboard-api",
+      });
 
-    const { result } = renderHook(() =>
-      useCopyToClipboard({ clearAfter: 100, permissions: "auto" })
-    );
+      const { result } = renderHook(() => useCopyToClipboard());
 
-    await act(async () => {
-      await result.current.copy("hello", { permissions: "none" });
-    });
-
-    expect(copyToClipboard).toHaveBeenCalledWith("hello", {
-      clearAfter: 100,
-      permissions: "none",
+      expect(result.current.copied).toBe(false);
+      expect(result.current.error).toBe(null);
+      expect(typeof result.current.copy).toBe("function");
+      expect(typeof result.current.reset).toBe("function");
     });
   });
 
-  it("returns result from copyToClipboard", async () => {
-    const resolved = {
-      success: true,
-      method: "exec-command" as const,
-    };
-    vi.mocked(copyToClipboard).mockResolvedValue(resolved);
+  describe("2. Successful copy", () => {
+    it("sets copied to true and error to null", async () => {
+      vi.mocked(copyToClipboard).mockResolvedValue({
+        success: true,
+        method: "clipboard-api",
+      });
 
-    const { result } = renderHook(() => useCopyToClipboard());
+      const { result } = renderHook(() => useCopyToClipboard());
 
-    let returned: Awaited<ReturnType<typeof result.current.copy>> | undefined;
-    await act(async () => {
-      returned = await result.current.copy("hi");
+      await act(async () => {
+        await result.current.copy("hello");
+      });
+
+      expect(result.current.copied).toBe(true);
+      expect(result.current.error).toBe(null);
+    });
+  });
+
+  describe("3. Timeout behavior", () => {
+    it("resets copied after timeout (fake timers)", async () => {
+      vi.useFakeTimers();
+      vi.mocked(copyToClipboard).mockResolvedValue({
+        success: true,
+        method: "clipboard-api",
+      });
+
+      const { result } = renderHook(() => useCopyToClipboard({ timeout: 1000 }));
+
+      await act(async () => {
+        await result.current.copy("hello");
+      });
+      expect(result.current.copied).toBe(true);
+
+      await act(async () => {
+        vi.advanceTimersByTime(1000);
+      });
+      expect(result.current.copied).toBe(false);
+    });
+  });
+
+  describe("4. reset()", () => {
+    it("clears copied and error", async () => {
+      vi.mocked(copyToClipboard).mockResolvedValue({
+        success: true,
+        method: "clipboard-api",
+      });
+
+      const { result } = renderHook(() => useCopyToClipboard());
+
+      await act(async () => {
+        await result.current.copy("hello");
+      });
+      expect(result.current.copied).toBe(true);
+
+      act(() => {
+        result.current.reset();
+      });
+      expect(result.current.copied).toBe(false);
+      expect(result.current.error).toBe(null);
     });
 
-    expect(returned).toEqual(resolved);
+    it("clears active timer so copied does not flip later", async () => {
+      vi.useFakeTimers();
+      vi.mocked(copyToClipboard).mockResolvedValue({
+        success: true,
+        method: "clipboard-api",
+      });
+
+      const { result } = renderHook(() => useCopyToClipboard({ timeout: 2000 }));
+
+      await act(async () => {
+        await result.current.copy("hello");
+      });
+      expect(result.current.copied).toBe(true);
+
+      act(() => {
+        result.current.reset();
+      });
+      expect(result.current.copied).toBe(false);
+
+      await act(async () => {
+        vi.advanceTimersByTime(2000);
+      });
+      expect(result.current.copied).toBe(false);
+    });
+  });
+
+  describe("5. Failure case", () => {
+    it("sets error when copyToClipboard returns success: false", async () => {
+      const err = new Error("copy failed");
+      vi.mocked(copyToClipboard).mockResolvedValue({
+        success: false,
+        method: "failed",
+        error: err,
+      });
+
+      const { result } = renderHook(() => useCopyToClipboard());
+
+      await act(async () => {
+        await result.current.copy("hello");
+      });
+
+      expect(result.current.copied).toBe(false);
+      expect(result.current.error).toBe(err);
+    });
+
+    it("sets error from result.code when result.error is missing", async () => {
+      vi.mocked(copyToClipboard).mockResolvedValue({
+        success: false,
+        method: "unsupported",
+        code: "NO_BROWSER_SUPPORT",
+      });
+
+      const { result } = renderHook(() => useCopyToClipboard());
+
+      await act(async () => {
+        await result.current.copy("hello");
+      });
+
+      expect(result.current.copied).toBe(false);
+      expect(result.current.error).toBe("NO_BROWSER_SUPPORT");
+    });
+  });
+
+  describe("6. Unmount safety", () => {
+    it("does not update state after unmount when copy resolves late", async () => {
+      let resolveCopy: (value: { success: true; method: "clipboard-api" }) => void;
+      const copyPromise = new Promise<{ success: true; method: "clipboard-api" }>(
+        (r) => {
+          resolveCopy = r;
+        }
+      );
+      vi.mocked(copyToClipboard).mockReturnValue(copyPromise);
+
+      const { result, unmount } = renderHook(() => useCopyToClipboard());
+
+      const copyPromiseResult = result.current.copy("hello");
+      unmount();
+
+      act(() => {
+        resolveCopy!({ success: true, method: "clipboard-api" });
+      });
+      await copyPromiseResult;
+
+      expect(result.current.copied).toBe(false);
+    });
+
+    it("clears timer on unmount so no timer runs after unmount", async () => {
+      vi.useFakeTimers();
+      vi.mocked(copyToClipboard).mockResolvedValue({
+        success: true,
+        method: "clipboard-api",
+      });
+
+      const { result, unmount } = renderHook(() =>
+        useCopyToClipboard({ timeout: 1000 })
+      );
+
+      await act(async () => {
+        await result.current.copy("hello");
+      });
+      expect(result.current.copied).toBe(true);
+
+      unmount();
+
+      await act(async () => {
+        vi.advanceTimersByTime(1000);
+      });
+    });
+  });
+
+  describe("options and return value", () => {
+    it("forwards clearAfter and permissions to copyToClipboard", async () => {
+      vi.mocked(copyToClipboard).mockResolvedValue({
+        success: true,
+        method: "clipboard-api",
+      });
+
+      const { result } = renderHook(() =>
+        useCopyToClipboard({ clearAfter: 500, permissions: "none" })
+      );
+
+      await act(async () => {
+        await result.current.copy("hello");
+      });
+
+      expect(copyToClipboard).toHaveBeenCalledWith("hello", {
+        clearAfter: 500,
+        permissions: "none",
+      });
+    });
+
+    it("copy() returns the CopyResult from copyToClipboard", async () => {
+      const resolved = {
+        success: true,
+        method: "exec-command" as const,
+      };
+      vi.mocked(copyToClipboard).mockResolvedValue(resolved);
+
+      const { result } = renderHook(() => useCopyToClipboard());
+
+      let returned: Awaited<ReturnType<typeof result.current.copy>> | undefined;
+      await act(async () => {
+        returned = await result.current.copy("hi");
+      });
+
+      expect(returned).toEqual(resolved);
+    });
   });
 });
