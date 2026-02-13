@@ -94,4 +94,21 @@ test.describe("Copy smoke", () => {
 
     await expect(page.getByTestId("action-result")).toHaveText("true");
   });
+
+  test("fallback works when navigator.clipboard is missing", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "clipboard", {
+        get: () => undefined,
+        configurable: true,
+      });
+    });
+
+    await page.goto("/");
+
+    await page.getByTestId("hook-copy").click();
+
+    await expect(page.getByTestId("copied-state")).toHaveText("true");
+  });
 });
