@@ -71,4 +71,27 @@ test.describe("Copy smoke", () => {
       page.getByTestId("component-onclick-fired")
     ).toHaveText("yes");
   });
+
+  test("copyAction works via form", async ({
+    page,
+    context,
+    browserName,
+  }) => {
+    if (browserName === "chromium") {
+      await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    }
+    await page.goto("/");
+
+    await page.getByTestId("action-input").fill("action-text");
+    await page.getByTestId("action-copy").click();
+
+    if (browserName === "chromium") {
+      const clipboardText = await page.evaluate(() =>
+        navigator.clipboard.readText()
+      );
+      expect(clipboardText).toBe("action-text");
+    }
+
+    await expect(page.getByTestId("action-result")).toHaveText("true");
+  });
 });
