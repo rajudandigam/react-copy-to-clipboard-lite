@@ -1,44 +1,82 @@
-import { useState, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { copyToClipboard } from "../core/copy.js";
-import type { CopyResult, CopyOptions } from "../core/types.js";
+import type { CopyOptions, CopyResult } from "../core/types.js";
 
 export type UseCopyToClipboardOptions = {
   timeout?: number;
-  clearAfter?: number;
-};
+} & CopyOptions;
 
-export function useCopyToClipboard(opts?: UseCopyToClipboardOptions): {
-  copyToClipboard: (text: string, options?: CopyOptions) => Promise<CopyResult>;
+export function useCopyToClipboard(
+  options: UseCopyToClipboardOptions = {}
+): {
+  copy: (text: string, override?: CopyOptions) => Promise<CopyResult>;
   copied: boolean;
   error: unknown | null;
   reset: () => void;
 } {
+  const { timeout = 2000, clearAfter, permissions = "auto" } = options;
+
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<unknown | null>(null);
 
+  const timerRef = useRef<ReturnType<typeof globalThis.setTimeout> | null>(null);
+  const mountedRef = useRef(true);
+
   const reset = useCallback(() => {
+    if (!mountedRef.current) return;
+
+    if (timerRef.current !== null) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+
     setCopied(false);
     setError(null);
   }, []);
 
   const copy = useCallback(
-    async (text: string, options?: CopyOptions): Promise<CopyResult> => {
+    async (text: string, override?: CopyOptions): Promise<CopyResult> => {
       const result = await copyToClipboard(text, {
-        ...options,
-        clearAfter: options?.clearAfter ?? opts?.clearAfter,
+        clearAfter,
+        permissions,
+        ...override,
       });
+
+      if (!mountedRef.current) return result;
+
       if (result.success) {
         setCopied(true);
         setError(null);
-        const ms = opts?.timeout ?? 2000;
-        if (ms > 0) setTimeout(() => setCopied(false), ms);
+
+        if (timerRef.current !== null) {
+          clearTimeout(timerRef.current);
+          timerRef.current = null;
+        }
+
+        timerRef.current = globalThis.setTimeout(() => {
+          timerRef.current = null;
+          if (mountedRef.current) {
+            setCopied(false);
+          }
+        }, timeout);
       } else {
-        setError(result.error ?? new Error("Copy failed"));
+        setError(result.error ?? result.code ?? null);
       }
+
       return result;
     },
-    [opts?.timeout, opts?.clearAfter]
+    [timeout, clearAfter, permissions]
   );
 
-  return { copyToClipboard: copy, copied, error, reset };
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+      if (timerRef.current !== null) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, []);
+
+  return { copy, copied, error, reset };
 }

@@ -4,12 +4,28 @@ import { copyToClipboard } from "../copy";
 describe("copyToClipboard() core engine", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    const g = global as unknown as {
+      navigator?: { clipboard?: unknown; permissions?: unknown };
+      document?: { execCommand?: unknown; queryCommandSupported?: unknown };
+    };
+    if (g.navigator) {
+      delete g.navigator.clipboard;
+      delete g.navigator.permissions;
+    }
+    if (g.document) {
+      delete g.document.execCommand;
+      delete g.document.queryCommandSupported;
+    }
   });
 
   it("returns unsupported in SSR environment", async () => {
     const originalWindow = global.window;
+    const originalDocument = global.document;
+
     // @ts-expect-error simulate SSR
     delete global.window;
+    // @ts-expect-error simulate SSR
+    delete global.document;
 
     const result = await copyToClipboard("hello");
 
@@ -17,6 +33,7 @@ describe("copyToClipboard() core engine", () => {
     expect(result.method).toBe("unsupported");
 
     global.window = originalWindow;
+    global.document = originalDocument;
   });
 
   it("uses clipboard-api when available", async () => {
@@ -182,6 +199,38 @@ describe("copyToClipboard() core engine", () => {
 
     expect(result.success).toBe(false);
     expect(result.method).toBe("failed");
+  });
+
+  it("maps NotAllowedError from fallback to PERMISSION_DENIED", async () => {
+    Object.defineProperty(global.navigator, "clipboard", {
+      value: {
+        writeText: vi.fn().mockRejectedValue(new Error("fail")),
+      },
+      configurable: true,
+    });
+
+    Object.defineProperty(global.window, "isSecureContext", {
+      value: true,
+      configurable: true,
+    });
+
+    Object.defineProperty(global.document, "queryCommandSupported", {
+      value: vi.fn().mockReturnValue(true),
+      configurable: true,
+    });
+
+    Object.defineProperty(global.document, "execCommand", {
+      value: vi.fn().mockImplementation(() => {
+        throw new DOMException("denied", "NotAllowedError");
+      }),
+      configurable: true,
+    });
+
+    const result = await copyToClipboard("hello");
+
+    expect(result.success).toBe(false);
+    expect(result.method).toBe("failed");
+    expect(result.code).toBe("PERMISSION_DENIED");
   });
 
   it("returns INSECURE_CONTEXT when no support and insecure context", async () => {
