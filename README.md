@@ -1,0 +1,1 @@
+# react-copy-to-clipboard-lite
