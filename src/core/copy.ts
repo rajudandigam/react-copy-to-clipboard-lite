@@ -2,7 +2,7 @@ import type { CopyResult, CopyOptions } from "./types.js";
 
 export type { CopyResult, CopyOptions } from "./types.js";
 
-export async function copy(
+export async function copyToClipboard(
   text: string,
   _options?: CopyOptions
 ): Promise<CopyResult> {

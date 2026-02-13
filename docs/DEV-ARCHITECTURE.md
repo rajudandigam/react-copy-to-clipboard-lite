@@ -8,14 +8,14 @@ Single source of truth for scaffolding, implementation, testing, packaging, and 
 
 ### One-line goal
 
-Build the smallest React 19+ clipboard micro-library with reliable HTTP fallback, structured CopyResult metadata, Actions support, and a migration-friendly `<Copy>` component — zero dependencies, SSR-safe, TypeScript-native, MIT.
+Build the smallest React 19+ clipboard micro-library with reliable HTTP fallback, structured CopyResult metadata, Actions support, and a migration-friendly `<CopyToClipboard>` component — zero dependencies, SSR-safe, TypeScript-native, MIT.
 
 ### Must-have features (v1)
 
-- **Core engine**: `copy(text, options)` — modern-first (Async Clipboard API), tiered fallback to execCommand via invisible `<textarea>`, SSR-safe, permission-aware (optional check, no prompting), returns structured `CopyResult`, supports `clearAfter` (clear only, no restore).
-- **React Hook**: `useClipboard({ timeout, clearAfter })` — `copy(text)` returning `Promise<CopyResult>`, `copied` boolean with auto-reset via timeout, `error` from last attempt, cleanup timers on unmount.
-- **Component**: `<Copy text="...">child</Copy>` — uses `cloneElement` to inject `onClick`, preserves user's existing `onClick`; optional `onCopyResult`, `onSuccess`, `onError`.
-- **React 19 Actions**: `copyAction` helper compatible with `formAction` and `useActionState`; developer can use React's pending states without extra local state.
+- **Core engine**: `copyToClipboard(text, options)` — modern-first (Async Clipboard API), tiered fallback to execCommand via invisible `<textarea>`, SSR-safe, permission-aware (optional check, no prompting), returns structured `CopyResult`, supports `clearAfter` (clear only, no restore).
+- **React Hook**: `useCopyToClipboard({ timeout, clearAfter })` — `copyToClipboard(text)` returning `Promise<CopyResult>`, `copied` boolean with auto-reset via timeout, `error` from last attempt, cleanup timers on unmount.
+- **Component**: `<CopyToClipboard text="...">child</CopyToClipboard>` — uses `cloneElement` to inject `onClick`, preserves user's existing `onClick`; optional `onCopyResult`, `onSuccess`, `onError`.
+- **React 19 Actions**: `copyToClipboardAction` helper compatible with `formAction` and `useActionState`; developer can use React's pending states without extra local state.
 - **Quality**: Vitest unit tests (engine tiers + result metadata), Playwright smoke tests (Chromium/Firefox/WebKit), ESM + CJS + types via tsup, MIT license, clean README, contributor-friendly repo.
 
 ### Explicit non-goals (v1)
@@ -60,19 +60,19 @@ export type CopyOptions = {
   permissions?: 'auto' | 'none';  // default 'auto'
 };
 
-export async function copy(text: string, options?: CopyOptions): Promise<CopyResult>;
+export async function copyToClipboard(text: string, options?: CopyOptions): Promise<CopyResult>;
 ```
 
 ### React Hook
 
 ```ts
-export type UseClipboardOptions = {
+export type UseCopyToClipboardOptions = {
   timeout?: number;     // ms for copied=true reset
   clearAfter?: number;  // forwarded to engine
 };
 
-export function useClipboard(opts?: UseClipboardOptions): {
-  copy: (text: string, options?: CopyOptions) => Promise<CopyResult>;
+export function useCopyToClipboard(opts?: UseCopyToClipboardOptions): {
+  copyToClipboard: (text: string, options?: CopyOptions) => Promise<CopyResult>;
   copied: boolean;
   error: unknown | null;
   reset: () => void;
@@ -82,7 +82,7 @@ export function useClipboard(opts?: UseClipboardOptions): {
 ### Component
 
 ```ts
-export function Copy(props: {
+export function CopyToClipboard(props: {
   text: string;
   clearAfter?: number;
   onCopyResult?: (r: CopyResult) => void;
@@ -98,7 +98,7 @@ export function Copy(props: {
 ### React 19 Actions helper
 
 ```ts
-export async function copyAction(
+export async function copyToClipboardAction(
   prevState: CopyResult | null,
   formData: FormData
 ): Promise<CopyResult>;
@@ -109,7 +109,7 @@ export async function copyAction(
 ```tsx
 <form>
   <input name="text" defaultValue="Hello" />
-  <button formAction={copyAction}>Copy</button>
+  <button formAction={copyToClipboardAction}>Copy</button>
 </form>
 ```
 
@@ -152,10 +152,10 @@ react-copy-to-clipboard-lite/
 │   │   ├── types.ts      # CopyMethod, CopyErrorCode, CopyResult, CopyOptions
 │   │   ├── permissions.ts
 │   │   ├── fallback.ts   # Tier 3 textarea execCommand
-│   │   └── copy.ts       # copy() engine
+│   │   └── copy.ts       # copyToClipboard() engine
 │   ├── react/
-│   │   ├── useClipboard.ts
-│   │   ├── Copy.tsx
+│   │   ├── useCopyToClipboard.ts
+│   │   ├── CopyToClipboard.tsx
 │   │   └── actions.ts
 │   ├── index.ts          # main entry (re-exports)
 │   ├── core.ts           # core-only entry
@@ -178,7 +178,7 @@ react-copy-to-clipboard-lite/
 ```
 
 - **src/core/** — types, permissions, fallback, copy engine (no React).
-- **src/react/** — hook, `<Copy>`, actions.
+- **src/react/** — hook, `<CopyToClipboard>`, actions.
 - **src/index.ts, core.ts, react.ts** — packaging exports for main, core-only, react-only.
 - **tests/** — Vitest unit tests; Playwright smoke and fixtures.
 
@@ -190,8 +190,8 @@ react-copy-to-clipboard-lite/
 2. Permission helper (`src/core/permissions.ts`)
 3. Fallback (`src/core/fallback.ts`)
 4. Engine (`src/core/copy.ts`)
-5. Hook (`src/react/useClipboard.ts`)
-6. Component (`src/react/Copy.tsx`)
+5. Hook (`src/react/useCopyToClipboard.ts`)
+6. Component (`src/react/CopyToClipboard.tsx`)
 7. Actions (`src/react/actions.ts`)
 8. Packaging exports (`src/index.ts`, `src/core.ts`, `src/react.ts`)
 9. Tests (Vitest then Playwright)
@@ -209,7 +209,7 @@ react-copy-to-clipboard-lite/
 
 ### Playwright (smoke)
 
-- Chromium, Firefox, WebKit: clicking `<Copy>` triggers success.
+- Chromium, Firefox, WebKit: clicking `<CopyToClipboard>` triggers success.
 - Optional: stub clipboard API failure to exercise fallback path.
 - Minimal page fixture for deterministic checks.
 
@@ -226,7 +226,7 @@ react-copy-to-clipboard-lite/
 ### React 19 / RSC compatibility
 
 - All browser-touching logic inside functions invoked at runtime, not module top-level.
-- React entry (hook, `<Copy>`, actions) documented as client-only for Next.js etc.
+- React entry (hook, `<CopyToClipboard>`, actions) documented as client-only for Next.js etc.
 
 ### Release
 
@@ -251,27 +251,27 @@ react-copy-to-clipboard-lite/
 ### C) Prompt templates (copy-paste for Cursor)
 
 **Engine:**  
-Implement `copy(text, options)` with tiered clipboard writeText + execCommand fallback using textarea, SSR-safe, permission-aware (no prompts), and return CopyResult metadata.
+Implement `copyToClipboard(text, options)` with tiered clipboard writeText + execCommand fallback using textarea, SSR-safe, permission-aware (no prompts), and return CopyResult metadata.
 
 **Hook:**  
-Implement `useClipboard({ timeout, clearAfter })` returning `{ copy, copied, error, reset }`. Must cleanup timers and expose CopyResult from engine.
+Implement `useCopyToClipboard({ timeout, clearAfter })` returning `{ copyToClipboard, copied, error, reset }`. Must cleanup timers and expose CopyResult from engine.
 
 **Component:**  
-Implement `<Copy text clearAfter onCopyResult onSuccess onError>{child}</Copy>` using cloneElement to inject onClick while preserving existing handlers.
+Implement `<CopyToClipboard text clearAfter onCopyResult onSuccess onError>{child}</CopyToClipboard>` using cloneElement to inject onClick while preserving existing handlers.
 
 **Actions:**  
-Implement `copyAction(prevState, formData)` compatible with formAction/useActionState; reads text from FormData and returns CopyResult.
+Implement `copyToClipboardAction(prevState, formData)` compatible with formAction/useActionState; reads text from FormData and returns CopyResult.
 
 ---
 
 ## 9. Execution checklist (definition of done)
 
-- [ ] `copy()` works in modern browsers; fallback works in Safari/WebKit.
+- [ ] `copyToClipboard()` works in modern browsers; fallback works in Safari/WebKit.
 - [ ] Returns `CopyResult` with `method` and `code`.
 - [ ] `clearAfter` clears only (best effort) without clipboard-read.
-- [ ] `useClipboard` stable with cleanup; no timer leaks.
-- [ ] `<Copy>` works with any clickable child and preserves handlers.
-- [ ] `copyAction` works with React 19 formAction/useActionState.
+- [ ] `useCopyToClipboard` stable with cleanup; no timer leaks.
+- [ ] `<CopyToClipboard>` works with any clickable child and preserves handlers.
+- [ ] `copyToClipboardAction` works with React 19 formAction/useActionState.
 - [ ] Vitest and Playwright (x3) tests passing.
 - [ ] ESM + CJS + types published under MIT.
 - [ ] README includes migration guide and Actions examples.

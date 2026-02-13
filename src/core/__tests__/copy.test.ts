@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { copy } from "../copy";
+import { copyToClipboard } from "../copy";
 
-describe("copy() core engine", () => {
+describe("copyToClipboard() core engine", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
@@ -11,7 +11,7 @@ describe("copy() core engine", () => {
     // @ts-expect-error simulate SSR
     delete global.window;
 
-    const result = await copy("hello");
+    const result = await copyToClipboard("hello");
 
     expect(result.success).toBe(false);
     expect(result.method).toBe("unsupported");
@@ -32,7 +32,7 @@ describe("copy() core engine", () => {
       configurable: true,
     });
 
-    const result = await copy("hello");
+    const result = await copyToClipboard("hello");
 
     expect(writeText).toHaveBeenCalledWith("hello");
     expect(result.success).toBe(true);

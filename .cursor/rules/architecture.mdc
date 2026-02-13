@@ -5,4 +5,4 @@ alwaysApply: true
 
 # react-copy-to-clipboard-lite
 
-React 19+ clipboard micro-library: zero deps, SSR-safe, tiered fallback (Async Clipboard API then execCommand via textarea), structured CopyResult, useClipboard hook, `<Copy>` component, and copyAction for formAction/useActionState. Full API contract, engine tiers, build order, testing, and packaging are in **docs/DEV-ARCHITECTURE.md** — read that file when implementing, scaffolding, or reviewing.
+React 19+ clipboard micro-library: zero deps, SSR-safe, tiered fallback (Async Clipboard API then execCommand via textarea), structured CopyResult, useCopyToClipboard hook, `<CopyToClipboard>` component, and copyToClipboardAction for formAction/useActionState. Full API contract, engine tiers, build order, testing, and packaging are in **docs/DEV-ARCHITECTURE.md** — read that file when implementing, scaffolding, or reviewing.
