@@ -38,4 +38,196 @@ describe("copyToClipboard() core engine", () => {
     expect(result.success).toBe(true);
     expect(result.method).toBe("clipboard-api");
   });
+
+  it("falls back to execCommand when clipboard API fails", async () => {
+    Object.defineProperty(global.navigator, "clipboard", {
+      value: {
+        writeText: vi.fn().mockRejectedValue(new DOMException("denied", "NotAllowedError")),
+      },
+      configurable: true,
+    });
+
+    Object.defineProperty(global.window, "isSecureContext", {
+      value: true,
+      configurable: true,
+    });
+
+    const execCommand = vi.fn().mockReturnValue(true);
+    Object.defineProperty(global.document, "execCommand", {
+      value: execCommand,
+      configurable: true,
+    });
+    Object.defineProperty(global.document, "queryCommandSupported", {
+      value: vi.fn().mockImplementation((cmd: string) => cmd === "copy"),
+      configurable: true,
+    });
+
+    const result = await copyToClipboard("hello");
+
+    expect(result.success).toBe(true);
+    expect(result.method).toBe("exec-command");
+    expect(execCommand).toHaveBeenCalledWith("copy");
+  });
+
+  it("skips clipboard API when permission is denied", async () => {
+    const writeText = vi.fn();
+    const query = vi.fn().mockResolvedValue({ state: "denied" });
+
+    Object.defineProperty(global.navigator, "clipboard", {
+      value: { writeText },
+      configurable: true,
+    });
+
+    Object.defineProperty(global.navigator, "permissions", {
+      value: { query },
+      configurable: true,
+    });
+
+    Object.defineProperty(global.window, "isSecureContext", {
+      value: true,
+      configurable: true,
+    });
+
+    Object.defineProperty(global.document, "queryCommandSupported", {
+      value: vi.fn().mockReturnValue(true),
+      configurable: true,
+    });
+
+    Object.defineProperty(global.document, "execCommand", {
+      value: vi.fn().mockReturnValue(true),
+      configurable: true,
+    });
+
+    const result = await copyToClipboard("hello");
+
+    expect(writeText).not.toHaveBeenCalled();
+    expect(result.success).toBe(true);
+    expect(result.method).toBe("exec-command");
+  });
+
+  it("does not query permissions when permissions option is 'none'", async () => {
+    const query = vi.fn();
+
+    Object.defineProperty(global.navigator, "permissions", {
+      value: { query },
+      configurable: true,
+    });
+
+    Object.defineProperty(global.window, "isSecureContext", {
+      value: true,
+      configurable: true,
+    });
+
+    Object.defineProperty(global.navigator, "clipboard", {
+      value: {
+        writeText: vi.fn().mockResolvedValue(undefined),
+      },
+      configurable: true,
+    });
+
+    await copyToClipboard("hello", { permissions: "none" });
+
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it("returns unsupported when queryCommandSupported is false", async () => {
+    Object.defineProperty(global.navigator, "clipboard", {
+      value: {
+        writeText: vi.fn().mockRejectedValue(new Error("fail")),
+      },
+      configurable: true,
+    });
+
+    Object.defineProperty(global.window, "isSecureContext", {
+      value: true,
+      configurable: true,
+    });
+
+    Object.defineProperty(global.document, "queryCommandSupported", {
+      value: vi.fn().mockReturnValue(false),
+      configurable: true,
+    });
+
+    const result = await copyToClipboard("hello");
+
+    expect(result.success).toBe(false);
+    expect(result.method).toBe("unsupported");
+    expect(result.code).toBe("NO_BROWSER_SUPPORT");
+  });
+
+  it("returns failed when fallback execCommand fails", async () => {
+    Object.defineProperty(global.navigator, "clipboard", {
+      value: {
+        writeText: vi.fn().mockRejectedValue(new Error("fail")),
+      },
+      configurable: true,
+    });
+
+    Object.defineProperty(global.window, "isSecureContext", {
+      value: true,
+      configurable: true,
+    });
+
+    Object.defineProperty(global.document, "queryCommandSupported", {
+      value: vi.fn().mockReturnValue(true),
+      configurable: true,
+    });
+
+    Object.defineProperty(global.document, "execCommand", {
+      value: vi.fn().mockReturnValue(false),
+      configurable: true,
+    });
+
+    const result = await copyToClipboard("hello");
+
+    expect(result.success).toBe(false);
+    expect(result.method).toBe("failed");
+  });
+
+  it("returns INSECURE_CONTEXT when no support and insecure context", async () => {
+    Object.defineProperty(global.window, "isSecureContext", {
+      value: false,
+      configurable: true,
+    });
+
+    Object.defineProperty(global.document, "queryCommandSupported", {
+      value: vi.fn().mockReturnValue(false),
+      configurable: true,
+    });
+
+    const result = await copyToClipboard("hello");
+
+    expect(result.success).toBe(false);
+    expect(result.code).toBe("INSECURE_CONTEXT");
+  });
+
+  it("schedules clearAfter and calls writeText('') after timeout", async () => {
+    vi.useFakeTimers();
+
+    const writeText = vi.fn().mockResolvedValue(undefined);
+
+    Object.defineProperty(global.navigator, "clipboard", {
+      value: { writeText },
+      configurable: true,
+    });
+
+    Object.defineProperty(global.window, "isSecureContext", {
+      value: true,
+      configurable: true,
+    });
+
+    const result = await copyToClipboard("hello", { clearAfter: 1000 });
+
+    expect(result.success).toBe(true);
+    expect(result.method).toBe("clipboard-api");
+    expect(writeText).toHaveBeenCalledWith("hello");
+    expect(writeText).toHaveBeenCalledTimes(1);
+
+    vi.advanceTimersByTime(1000);
+
+    expect(writeText).toHaveBeenCalledWith("");
+    expect(writeText).toHaveBeenCalledTimes(2);
+
+    vi.useRealTimers();
+  });
 });
