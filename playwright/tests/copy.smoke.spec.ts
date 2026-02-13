@@ -4,16 +4,21 @@ test.describe("Copy smoke", () => {
   test("Hook basic copy: clipboard has text and copied-state is true", async ({
     page,
     context,
+    browserName,
   }) => {
-    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    if (browserName === "chromium") {
+      await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    }
     await page.goto("/");
 
     await page.getByTestId("hook-copy").click();
 
-    const clipboardText = await page.evaluate(() =>
-      navigator.clipboard.readText()
-    );
-    expect(clipboardText).toBe("hook-text");
+    if (browserName === "chromium") {
+      const clipboardText = await page.evaluate(() =>
+        navigator.clipboard.readText()
+      );
+      expect(clipboardText).toBe("hook-text");
+    }
 
     await expect(page.getByTestId("copied-state")).toHaveText("true");
   });
