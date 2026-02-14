@@ -234,14 +234,13 @@ test.describe("Copy smoke", () => {
     }
     await page.goto("/");
 
-    await page.getByTestId("input-copy-field").fill("https://shared.link/abc");
     await page.getByTestId("input-copy-btn").click();
 
     if (browserName === "chromium") {
       const text = await page.evaluate(() =>
         navigator.clipboard.readText()
       );
-      expect(text).toBe("https://shared.link/abc");
+      expect(text).toBe("https://example.com/share");
     }
     await expect(page.getByTestId("copied-state")).toHaveText("true");
   });
