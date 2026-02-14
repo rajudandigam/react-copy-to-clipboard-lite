@@ -6,6 +6,7 @@ export default defineConfig({
   retries: 2,
   timeout: 30_000,
   expect: { timeout: 5_000 },
+  reporter: [["html", { outputFolder: "playwright-report" }]],
   webServer: {
     command: "npm run dev:demo",
     url: "http://localhost:5173",
