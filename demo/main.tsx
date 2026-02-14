@@ -42,7 +42,7 @@ function App() {
       <header className="hero">
         <h1>react-copy-to-clipboard-lite</h1>
         <p className="muted">
-          Modern, dependency-free clipboard utility for React 18+ and React 19
+          Modern, light weight, dependency-free clipboard utility for React 18+ and React 19
           Actions.
         </p>
         <div className="code-block">
