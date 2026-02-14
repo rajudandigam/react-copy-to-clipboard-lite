@@ -14,20 +14,35 @@ function HookExamples() {
     clearAfter: 1000,
   });
   const [url, setUrl] = useState("https://example.com/share");
+  const [lastHookResult, setLastHookResult] = useState<{
+    success: boolean;
+    method: string;
+  } | null>(null);
   const [lastResult, setLastResult] = useState<{
     success: boolean;
     method: string;
   } | null>(null);
 
   return (
-    <section aria-labelledby="hook-heading">
+    <section
+      aria-labelledby="hook-heading"
+      style={{
+        marginBottom: "2rem",
+        paddingBottom: "1rem",
+        borderBottom: "1px solid #ddd",
+      }}
+    >
       <h2 id="hook-heading">1. Hook examples</h2>
 
       <h3>A. Simple imperative copy</h3>
       <button
         type="button"
         data-testid="hook-copy"
-        onClick={() => copy("hook-text")}
+        onClick={() =>
+          copy("hook-text").then((r) =>
+            setLastHookResult({ success: r.success, method: r.method })
+          )
+        }
       >
         Copy hook-text
       </button>
@@ -38,6 +53,9 @@ function HookExamples() {
       >
         {String(copied)}
       </span>
+      {lastHookResult != null && (
+        <span data-testid="hook-method">{lastHookResult.method}</span>
+      )}
       <button type="button" data-testid="reset-btn" onClick={reset}>
         Reset
       </button>
@@ -47,7 +65,6 @@ function HookExamples() {
         type="text"
         data-testid="input-copy-field"
         value={url}
-        readOnly
         onChange={(e) => setUrl(e.target.value)}
         aria-label="URL to copy"
       />
@@ -143,7 +160,14 @@ function ComponentExamples() {
   const [componentClicked, setComponentClicked] = useState(false);
 
   return (
-    <section aria-labelledby="component-heading">
+    <section
+      aria-labelledby="component-heading"
+      style={{
+        marginBottom: "2rem",
+        paddingBottom: "1rem",
+        borderBottom: "1px solid #ddd",
+      }}
+    >
       <h2 id="component-heading">2. Component wrapper examples</h2>
 
       <h3>A. Button</h3>
@@ -162,7 +186,17 @@ function ComponentExamples() {
 
       <h3>B. Span (clickable text)</h3>
       <CopyToClipboard text="span-copy-text">
-        <span data-testid="component-span" role="button" tabIndex={0}>
+        <span
+          data-testid="component-span"
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              e.currentTarget.click();
+            }
+          }}
+        >
           Click to copy span text
         </span>
       </CopyToClipboard>
@@ -190,7 +224,14 @@ function ActionExamples() {
   const [actionResult, formAction] = useActionState(copyToClipboardAction, null);
 
   return (
-    <section aria-labelledby="action-heading">
+    <section
+      aria-labelledby="action-heading"
+      style={{
+        marginBottom: "2rem",
+        paddingBottom: "1rem",
+        borderBottom: "1px solid #ddd",
+      }}
+    >
       <h2 id="action-heading">3. React 19 action</h2>
       <form action={formAction}>
         <input
@@ -216,9 +257,21 @@ function ActionExamples() {
 
 function ErrorDemoSection() {
   const { copy, error } = useCopyToClipboard();
+  const [lastResult, setLastResult] = useState<{
+    success: boolean;
+    method: string;
+    code?: string;
+  } | null>(null);
 
   return (
-    <section aria-labelledby="error-heading">
+    <section
+      aria-labelledby="error-heading"
+      style={{
+        marginBottom: "2rem",
+        paddingBottom: "1rem",
+        borderBottom: "1px solid #ddd",
+      }}
+    >
       <h2 id="error-heading">4. Error / metadata</h2>
       <p>
         When copy fails (e.g. insecure context, denied), error and method are
@@ -227,13 +280,27 @@ function ErrorDemoSection() {
       <button
         type="button"
         data-testid="error-demo-copy"
-        onClick={() => copy("will-fail-in-insecure")}
+        onClick={() =>
+          copy("will-fail-in-insecure").then((r) =>
+            setLastResult({
+              success: r.success,
+              method: r.method,
+              code: r.code,
+            })
+          )
+        }
       >
         Copy (shows error if unsupported)
       </button>
-      {error != null && (
+      {(error != null || lastResult != null) && (
         <div data-testid="error-demo-state" role="alert">
-          {String(error)}
+          {error != null && <div>Error: {String(error)}</div>}
+          {lastResult != null && (
+            <div>
+              Success: {String(lastResult.success)}, Method: {lastResult.method}
+              {lastResult.code != null && `, Code: ${lastResult.code}`}
+            </div>
+          )}
         </div>
       )}
     </section>

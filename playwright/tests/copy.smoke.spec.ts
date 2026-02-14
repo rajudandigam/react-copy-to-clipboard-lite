@@ -32,13 +32,15 @@ test.describe("Copy smoke", () => {
     await page.getByTestId("hook-copy").click();
 
     if (browserName === "chromium") {
-      let clipboardText = await page.evaluate(() =>
+      const clipboardText = await page.evaluate(() =>
         navigator.clipboard.readText()
       );
       expect(clipboardText).toBe("hook-text");
     }
 
-    await page.waitForTimeout(1500);
+    await expect(page.getByTestId("copied-state")).toHaveText("false", {
+      timeout: 2000,
+    });
 
     if (browserName === "chromium") {
       const clipboardAfter = await page.evaluate(() =>
@@ -46,8 +48,25 @@ test.describe("Copy smoke", () => {
       );
       expect(clipboardAfter).toBe("");
     }
+  });
 
-    await expect(page.getByTestId("copied-state")).toHaveText("false");
+  test("hook exposes correct method metadata", async ({
+    page,
+    context,
+    browserName,
+  }) => {
+    if (browserName === "chromium") {
+      await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    }
+    await page.goto("/");
+
+    await page.getByTestId("hook-copy").click();
+
+    await expect(page.getByTestId("hook-method")).toBeVisible();
+    const method = await page.getByTestId("hook-method").textContent();
+    expect(
+      ["clipboard-api", "exec-command"].includes(method?.trim() ?? "")
+    ).toBe(true);
   });
 
   test("fallback works in insecure context", async ({ page }) => {
@@ -157,6 +176,31 @@ test.describe("Copy smoke", () => {
     await expect(
       page.getByTestId("component-onclick-fired")
     ).toHaveText("yes");
+  });
+
+  test("span copy trigger is keyboard accessible (Enter)", async ({
+    page,
+    context,
+    browserName,
+  }) => {
+    test.skip(
+      browserName === "webkit",
+      "Clipboard read unsupported in WebKit"
+    );
+    if (browserName === "chromium") {
+      await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    }
+    await page.goto("/");
+
+    await page.getByTestId("component-span").focus();
+    await page.getByTestId("component-span").press("Enter");
+
+    if (browserName === "chromium") {
+      const clipboardText = await page.evaluate(() =>
+        navigator.clipboard.readText()
+      );
+      expect(clipboardText).toBe("span-copy-text");
+    }
   });
 
   test("copyAction works via form", async ({
