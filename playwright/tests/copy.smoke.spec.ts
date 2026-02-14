@@ -182,6 +182,139 @@ test.describe("Copy smoke", () => {
     await expect(page.getByTestId("action-result")).toHaveText("true");
   });
 
+  test("action displays result metadata (success + method)", async ({
+    page,
+    context,
+    browserName,
+  }) => {
+    if (browserName === "chromium") {
+      await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    }
+    await page.goto("/");
+
+    await page.getByTestId("action-input").fill("meta-text");
+    await page.getByTestId("action-copy").click();
+
+    await expect(page.getByTestId("action-result")).toHaveText("true");
+    await expect(page.getByTestId("action-method")).toBeVisible();
+    const method = await page.getByTestId("action-method").textContent();
+    expect(
+      ["clipboard-api", "exec-command"].includes(method?.trim() ?? "")
+    ).toBe(true);
+  });
+
+  test("multiline copy preserves newlines (Chromium)", async ({
+    page,
+    context,
+    browserName,
+  }) => {
+    test.skip(
+      browserName !== "chromium",
+      "Clipboard read only in Chromium"
+    );
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    await page.goto("/");
+
+    await page.getByTestId("multiline-copy").click();
+
+    const clipboardText = await page.evaluate(() =>
+      navigator.clipboard.readText()
+    );
+    expect(clipboardText).toBe("line one\nline two\nline three");
+    await expect(page.getByTestId("copied-state")).toHaveText("true");
+  });
+
+  test("copy from input field works", async ({
+    page,
+    context,
+    browserName,
+  }) => {
+    if (browserName === "chromium") {
+      await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    }
+    await page.goto("/");
+
+    await page.getByTestId("input-copy-field").fill("https://shared.link/abc");
+    await page.getByTestId("input-copy-btn").click();
+
+    if (browserName === "chromium") {
+      const text = await page.evaluate(() =>
+        navigator.clipboard.readText()
+      );
+      expect(text).toBe("https://shared.link/abc");
+    }
+    await expect(page.getByTestId("copied-state")).toHaveText("true");
+  });
+
+  test("clearAfter does not break initial success", async ({
+    page,
+    context,
+    browserName,
+  }) => {
+    if (browserName === "chromium") {
+      await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    }
+    await page.goto("/");
+
+    await page.getByTestId("clear-after-copy").click();
+
+    await expect(page.getByTestId("copied-state")).toHaveText("true");
+    await expect(page.getByTestId("clear-after-indicator")).toHaveText(
+      /Copied.*clear/
+    );
+    if (browserName === "chromium") {
+      const text = await page.evaluate(() =>
+        navigator.clipboard.readText()
+      );
+      expect(text).toBe("secret-api-key");
+    }
+  });
+
+  test("custom component wrapper copies correctly", async ({
+    page,
+    context,
+    browserName,
+  }) => {
+    if (browserName === "chromium") {
+      await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    }
+    await page.goto("/");
+
+    await page.getByTestId("custom-component-button").click();
+
+    if (browserName === "chromium") {
+      const text = await page.evaluate(() =>
+        navigator.clipboard.readText()
+      );
+      expect(text).toBe("custom-component-text");
+    }
+  });
+
+  test("error state displays when copy fails", async ({
+    page,
+    browserName,
+  }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "clipboard", {
+        get: () => ({
+          writeText: () => Promise.reject(new Error("denied")),
+          readText: () => Promise.reject(new Error("denied")),
+        }),
+        configurable: true,
+      });
+      const origExec = document.execCommand;
+      document.execCommand = function () {
+        if (arguments[0] === "copy") throw new Error("exec copy failed");
+        return origExec?.apply(document, arguments as never) ?? false;
+      };
+    });
+
+    await page.goto("/");
+    await page.getByTestId("hook-copy").click();
+
+    await expect(page.getByTestId("error-state")).toBeVisible();
+  });
+
   test("fallback works when navigator.clipboard is missing", async ({
     page,
     context,
