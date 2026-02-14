@@ -239,7 +239,7 @@ No clipboard-read.
 
 ## Real Demo Examples
 
-**[→ Live demo](https://react-copy-to-clipboard-lite.vercel.app/)**
+**<a href="https://react-copy-to-clipboard-lite.vercel.app/" target="_blank" rel="noopener noreferrer">→ Live demo</a>**
 
 ![Demo preview](docs/demo-preview.png)
 
