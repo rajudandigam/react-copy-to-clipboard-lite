@@ -59,6 +59,7 @@
     "dev": "tsup --watch",
     "lint": "eslint . --ext .ts,.tsx",
     "dev:demo": "vite --config demo/vite.config.ts",
+    "build:demo": "npm run build && vite build --config demo/vite.config.ts",
     "size": "size-limit",
     "check:bundle": "grep -q \"react\" dist/core.mjs && echo \"⚠ React found in core bundle\" && exit 1 || echo \"Bundle clean\"",
     "changeset": "changeset",
