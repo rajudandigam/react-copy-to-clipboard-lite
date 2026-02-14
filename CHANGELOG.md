@@ -1,5 +1,15 @@
 # react-copy-to-clipboard-lite
 
+## 1.0.2
+
+### Patch Changes
+
+- [`1cbb867`](https://github.com/rajudandigam/react-copy-to-clipboard-lite/commit/1cbb8673e5d16b9add7925c573f4c658c8a4966b) Thanks [@rajudandigam](https://github.com/rajudandigam)! - updated package and readme files
+
+- [`1cbb867`](https://github.com/rajudandigam/react-copy-to-clipboard-lite/commit/1cbb8673e5d16b9add7925c573f4c658c8a4966b) Thanks [@rajudandigam](https://github.com/rajudandigam)! - updated package and readme files
+
+- [`1cbb867`](https://github.com/rajudandigam/react-copy-to-clipboard-lite/commit/1cbb8673e5d16b9add7925c573f4c658c8a4966b) Thanks [@rajudandigam](https://github.com/rajudandigam)! - updated pacakage and readme files
+
 ## 1.0.1
 
 ### Patch Changes
