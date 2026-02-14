@@ -132,6 +132,15 @@ pre,
   margin-top: 8px;
 }
 
+.example-block {
+  display: block;
+  margin-bottom: 1.25rem;
+}
+
+.example-block:last-child {
+  margin-bottom: 0;
+}
+
 @media (max-width: 640px) {
   main {
     padding: 32px 16px;

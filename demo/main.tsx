@@ -9,12 +9,16 @@ import {
 
 const MULTILINE_TEXT = "line one\nline two\nline three";
 
+type HookCopySource = "simple" | "input" | "multiline" | "clearAfter" | null;
+
 function App() {
   const { copy, copied, error, reset } = useCopyToClipboard({
     clearAfter: 1000,
   });
 
   const [url] = useState("https://example.com/share");
+  const [lastCopiedSource, setLastCopiedSource] =
+    useState<HookCopySource>(null);
   const [lastHookResult, setLastHookResult] = useState<{
     success: boolean;
     method: string;
@@ -24,7 +28,14 @@ function App() {
     method: string;
   } | null>(null);
   const [componentClicked, setComponentClicked] = useState(false);
+  const [spanCopied, setSpanCopied] = useState(false);
+  const [customCopied, setCustomCopied] = useState(false);
   const [actionResult, formAction] = useActionState(copyToClipboardAction, null);
+
+  const showCopiedFeedback = (setter: (v: boolean) => void) => {
+    setter(true);
+    setTimeout(() => setter(false), 2000);
+  };
 
   return (
     <main>
@@ -48,11 +59,12 @@ function App() {
           <button
             type="button"
             data-testid="hook-copy"
-            onClick={() =>
+            onClick={() => {
+              setLastCopiedSource("simple");
               copy("hook-text").then((r) =>
                 setLastHookResult({ success: r.success, method: r.method })
-              )
-            }
+              );
+            }}
           >
             Copy hook-text
           </button>
@@ -79,37 +91,58 @@ function App() {
           readOnly
           aria-label="URL to copy"
         />
-        <button
-          type="button"
-          data-testid="input-copy-btn"
-          onClick={() => copy(url)}
-        >
-          Copy URL
-        </button>
+        <div className="example-row">
+          <button
+            type="button"
+            data-testid="input-copy-btn"
+            onClick={() => {
+              setLastCopiedSource("input");
+              copy(url);
+            }}
+          >
+            Copy URL
+          </button>
+          {lastCopiedSource === "input" && copied && (
+            <span className="success-badge">Copied</span>
+          )}
+        </div>
 
         <h3>Multiline copy</h3>
         <pre data-testid="multiline-text">{MULTILINE_TEXT}</pre>
-        <button
-          type="button"
-          data-testid="multiline-copy"
-          onClick={() => copy(MULTILINE_TEXT)}
-        >
-          Copy multiline
-        </button>
+        <div className="example-row">
+          <button
+            type="button"
+            data-testid="multiline-copy"
+            onClick={() => {
+              setLastCopiedSource("multiline");
+              copy(MULTILINE_TEXT);
+            }}
+          >
+            Copy multiline
+          </button>
+          {lastCopiedSource === "multiline" && copied && (
+            <span className="success-badge">Copied</span>
+          )}
+        </div>
 
         <h3>clearAfter demo (clears in 1s)</h3>
-        <button
-          type="button"
-          data-testid="clear-after-copy"
-          onClick={() => copy("secret-api-key")}
-        >
-          Copy API key (clears in 1s)
-        </button>
-        {copied && (
-          <span data-testid="clear-after-indicator">
-            Copied — clipboard will clear in 1s
-          </span>
-        )}
+        <div className="example-row">
+          <button
+            type="button"
+            data-testid="clear-after-copy"
+            onClick={() => {
+              setLastCopiedSource("clearAfter");
+              copy("secret-api-key");
+            }}
+          >
+            Copy API key (clears in 1s)
+          </button>
+          {lastCopiedSource === "clearAfter" && copied && (
+            <span data-testid="clear-after-indicator">
+              Copied — clipboard will clear in 1s
+            </span>
+          )}
+        </div>
 
         <h3>Programmatic copy (root import)</h3>
         <button
@@ -133,62 +166,87 @@ function App() {
           </div>
         )}
 
-        {error && (
+        {error != null ? (
           <div data-testid="error-state" role="alert">
             {String(error)}
           </div>
-        )}
+        ) : null}
       </section>
 
       {/* Component Examples */}
       <section>
         <h2>Component Wrapper</h2>
 
-        <CopyToClipboard text="component-text">
-          <button
-            type="button"
-            data-testid="component-copy"
-            onClick={() => setComponentClicked(true)}
-          >
-            Copy component-text
-          </button>
-        </CopyToClipboard>
+        <div className="example-block">
+          <h3>Button</h3>
+          <div className="example-row">
+            <CopyToClipboard text="component-text">
+              <button
+                type="button"
+                data-testid="component-copy"
+                onClick={() => setComponentClicked(true)}
+              >
+                Copy component-text
+              </button>
+            </CopyToClipboard>
+            {componentClicked && (
+              <span data-testid="component-onclick-fired">yes</span>
+            )}
+          </div>
+        </div>
 
-        {componentClicked && (
-          <span data-testid="component-onclick-fired">yes</span>
-        )}
+        <div className="example-block">
+          <h3>Span (clickable text)</h3>
+          <div className="example-row">
+            <CopyToClipboard
+              text="span-copy-text"
+              onSuccess={() => showCopiedFeedback(setSpanCopied)}
+            >
+              <span
+                data-testid="component-span"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    e.currentTarget.click();
+                  }
+                }}
+              >
+                Click to copy span text
+              </span>
+            </CopyToClipboard>
+            {spanCopied && <span className="success-badge">Copied</span>}
+          </div>
+        </div>
 
-        <CopyToClipboard text="span-copy-text">
-          <span
-            data-testid="component-span"
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                e.currentTarget.click();
-              }
-            }}
-          >
-            Click to copy span text
-          </span>
-        </CopyToClipboard>
+        <div className="example-block">
+          <h3>Custom button</h3>
+          <div className="example-row">
+            <CopyToClipboard
+              text="custom-component-text"
+              onSuccess={() => showCopiedFeedback(setCustomCopied)}
+            >
+              <button type="button" data-testid="custom-component-button">
+                Custom button copy
+              </button>
+            </CopyToClipboard>
+            {customCopied && <span className="success-badge">Copied</span>}
+          </div>
+        </div>
 
-        <CopyToClipboard text="custom-component-text">
-          <button type="button" data-testid="custom-component-button">
-            Custom button copy
-          </button>
-        </CopyToClipboard>
-
-        <CopyToClipboard text="blocked">
-          <button
-            type="button"
-            data-testid="prevent-copy"
-            onClick={(e) => e.preventDefault()}
-          >
-            Prevent Copy
-          </button>
-        </CopyToClipboard>
+        <div className="example-block">
+          <h3>preventDefault demo</h3>
+          <CopyToClipboard text="blocked">
+            <button
+              type="button"
+              data-testid="prevent-copy"
+              onClick={(e) => e.preventDefault()}
+            >
+              Prevent Copy
+            </button>
+          </CopyToClipboard>
+        </div>
       </section>
 
       {/* Action */}
