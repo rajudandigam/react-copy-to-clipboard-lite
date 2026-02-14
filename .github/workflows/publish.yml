@@ -30,10 +30,15 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          registry-url: https://registry.npmjs.org/
 
       - run: npm ci
       - run: npm run build
+
+      - name: Ensure OIDC-only auth (no token in .npmrc)
+        run: |
+          if [ -f "$HOME/.npmrc" ]; then
+            sed -i '/\/\/registry\.npmjs\.org\/:_authToken/d' "$HOME/.npmrc" || true
+          fi
 
       - name: Create Release PR or Publish
         uses: changesets/action@v1

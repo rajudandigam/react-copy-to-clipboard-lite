@@ -31,7 +31,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/rajudandigam/react-copy-to-clipboard-lite.git"
+    "url": "git+https://github.com/rajudandigam/react-copy-to-clipboard-lite.git"
   },
   "bugs": {
     "url": "https://github.com/rajudandigam/react-copy-to-clipboard-lite/issues"
