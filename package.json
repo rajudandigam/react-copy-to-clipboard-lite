@@ -46,7 +46,7 @@
   "packageManager": "npm@10",
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "tsup",
+    "build": "tsup && rm -f dist/*.d.cts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
