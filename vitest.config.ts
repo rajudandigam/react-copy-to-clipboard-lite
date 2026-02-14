@@ -2,11 +2,13 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    exclude: ["**/node_modules/**", "**/dist/**", "playwright/**"],
     environment: "jsdom",
     globals: true,
     clearMocks: true,
     restoreMocks: true,
+    exclude: ["**/node_modules/**", "**/dist/**", "playwright/**"],
+    testTimeout: 10000,
+    threads: true,
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "lcov"],
@@ -16,6 +18,8 @@ export default defineConfig({
         "node_modules/**",
         "**/*.d.ts",
         "vitest.config.ts",
+        "demo/**",
+        "playwright/**",
         "src/core.ts",
         "src/index.ts",
         "src/react.ts",

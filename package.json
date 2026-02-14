@@ -1,6 +1,7 @@
 {
   "name": "react-copy-to-clipboard-lite",
   "version": "0.0.1",
+  "private": false,
   "description": "Tiny, modern React 19+ clipboard utility with tiered fallback and metadata.",
   "license": "MIT",
   "type": "module",
@@ -42,6 +43,7 @@
   "engines": {
     "node": ">=18"
   },
+  "packageManager": "npm@10",
   "scripts": {
     "clean": "rm -rf dist",
     "build": "tsup",
@@ -49,9 +51,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:pw": "playwright test --config playwright/playwright.config.ts",
-    "test:all": "npm run typecheck && npm run test && npm run build && npm run test:pw",
+    "test:all": "npm run typecheck && npm run build && npm run test && npm run test:pw",
     "prepack": "npm run clean && npm run build",
     "prepublishOnly": "npm run test:all",
+    "prepare": "npm run build",
     "dev": "tsup --watch",
     "lint": "eslint . --ext .ts,.tsx",
     "dev:demo": "vite --config demo/vite.config.ts"
@@ -64,7 +67,14 @@
     "useActionState",
     "strictmode safe",
     "copy button",
-    "nextjs clipboard"
+    "nextjs clipboard",
+    "copy-to-clipboard",
+    "react clipboard hook",
+    "clipboard api",
+    "react copy button",
+    "tiny react library",
+    "clipboard fallback",
+    "execCommand fallback"
   ],
   "peerDependencies": {
     "react": ">=18"
