@@ -14,6 +14,7 @@ type HookCopySource = "simple" | "input" | "multiline" | "clearAfter" | null;
 function App() {
   const { copy, copied, error, reset } = useCopyToClipboard({
     clearAfter: 1000,
+    timeout: 1000,
   });
 
   const [url] = useState("https://example.com/share");

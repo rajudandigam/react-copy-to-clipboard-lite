@@ -192,8 +192,12 @@ test.describe("Copy smoke", () => {
     }
     await page.goto("/");
 
-    await page.getByTestId("component-span").focus();
-    await page.getByTestId("component-span").press("Enter");
+    const span = page.getByTestId("component-span");
+    await span.scrollIntoViewIfNeeded();
+    await page.getByRole("heading", { name: "Component Wrapper" }).click();
+    await span.focus();
+    await expect(span).toBeFocused();
+    await span.press("Enter");
 
     if (browserName === "chromium") {
       const clipboardText = await page.evaluate(() =>
