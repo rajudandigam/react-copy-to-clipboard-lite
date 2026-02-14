@@ -1,5 +1,6 @@
-import { useActionState, useState } from "react";
+import React, { useActionState, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { copyToClipboard } from "react-copy-to-clipboard-lite";
 import {
   useCopyToClipboard,
   CopyToClipboard,
@@ -12,6 +13,7 @@ function App() {
   });
   const [actionResult, formAction] = useActionState(copyToClipboardAction, null);
   const [componentClicked, setComponentClicked] = useState(false);
+  const [indexCopyOk, setIndexCopyOk] = useState<boolean | null>(null);
 
   return (
     <main>
@@ -27,7 +29,7 @@ function App() {
           Copy hook-text
         </button>
         <span data-testid="copied-state">{String(copied)}</span>
-        <button type="button" onClick={reset}>
+        <button type="button" data-testid="reset-btn" onClick={reset}>
           Reset
         </button>
       </section>
@@ -44,6 +46,33 @@ function App() {
           </button>
         </CopyToClipboard>
         {componentClicked && <span data-testid="component-onclick-fired">yes</span>}
+        <CopyToClipboard text="blocked">
+          <button
+            type="button"
+            data-testid="prevent-copy"
+            onClick={(e) => e.preventDefault()}
+          >
+            Prevent Copy
+          </button>
+        </CopyToClipboard>
+      </section>
+
+      <section>
+        <h2>Root import (index)</h2>
+        <button
+          type="button"
+          data-testid="index-copy"
+          onClick={() =>
+            copyToClipboard("from-index").then((r) =>
+              setIndexCopyOk(r.success)
+            )
+          }
+        >
+          Copy via index
+        </button>
+        {indexCopyOk !== null && (
+          <span data-testid="index-copy-result">{String(indexCopyOk)}</span>
+        )}
       </section>
 
       <section>
