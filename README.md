@@ -1,7 +1,6 @@
 # react-copy-to-clipboard-lite
 
-> Tiny, modern, dependency-free clipboard utility for React 18+  
-> Secure. SSR-safe. Permission-aware. Fully tested. MIT.
+> Tiny, dependency-free clipboard utility for React 18+. SSR-safe. Permission-aware. MIT.
 
 [![CI](https://github.com/rajudandigam/react-copy-to-clipboard-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/rajudandigam/react-copy-to-clipboard-lite/actions)
 [![Size](https://img.shields.io/bundlephobia/minzip/react-copy-to-clipboard-lite)](https://bundlephobia.com/package/react-copy-to-clipboard-lite)
@@ -9,335 +8,158 @@
 
 ---
 
-## Why another clipboard library?
+## Why this library?
 
-Most clipboard utilities:
-
-- depend on legacy libraries
-- use prompt() fallbacks
-- are not SSR-safe
-- lack structured error metadata
-- don't support React 19 Actions
-- ship unnecessary dependencies
-
-**react-copy-to-clipboard-lite** is built for modern React apps:
-
-- ✅ Zero runtime dependencies
-- ✅ Tiered fallback (Clipboard API → execCommand)
-- ✅ Structured `CopyResult` metadata
-- ✅ Permission-aware (no prompting)
-- ✅ React 19 `formAction` support
-- ✅ Strict TypeScript
-- ✅ Fully tested (Vitest + Playwright)
-- ✅ Bundle size gated in CI
-- ✅ Trusted npm publishing (OIDC)
+- Zero runtime dependencies, tiered fallback (Clipboard API → execCommand)
+- Structured `CopyResult`, never throws
+- Permission-aware (no `prompt()`), SSR-safe
+- React 19 `formAction` / `useActionState` support
+- TypeScript strict, size-gated in CI
 
 ---
 
-## Installation
+## Install
 
 ```bash
 npm install react-copy-to-clipboard-lite
+# or: pnpm add / yarn add
 ```
 
-or
-
-```bash
-pnpm add react-copy-to-clipboard-lite
-```
-
-or
-
-```bash
-yarn add react-copy-to-clipboard-lite
-```
-
-Peer dependency:
-
-```
-react >= 18
-```
+Peer: `react >= 18`
 
 ---
 
-## Real Demo Examples
+## Demo
 
-**<a href="https://react-copy-to-clipboard-lite.vercel.app/" target="_blank" rel="noopener noreferrer">→ Live demo</a>**
+**[Live demo](https://react-copy-to-clipboard-lite.vercel.app/)** · Run locally: `npm run dev:demo`
 
-![Demo preview](docs/demo-preview.png)
-
-The repository includes a full demo app covering:
-
-- Imperative copy
-- Copy from input
-- Multiline text
-- Temporary success UI
-- clearAfter
-- Custom components
-- React 19 actions
-- Error handling
-- Fallback in insecure contexts
-
-Run locally:
-
-```bash
-npm run dev:demo
-```
+![Demo preview](https://raw.githubusercontent.com/rajudandigam/react-copy-to-clipboard-lite/main/docs/demo-preview.png)
 
 ---
 
-## Core Usage (Framework Agnostic)
+## Core (framework-agnostic)
 
 ```ts
 import { copyToClipboard } from "react-copy-to-clipboard-lite";
 
 const result = await copyToClipboard("Hello world");
-
-if (result.success) {
-  console.log("Copied via:", result.method);
-} else {
-  console.log("Failed:", result.code);
-}
+if (result.success) console.log("Copied via:", result.method);
+else console.log("Failed:", result.code);
 ```
 
 ---
 
-## React Hook
+## Hook
 
 ```tsx
 import { useCopyToClipboard } from "react-copy-to-clipboard-lite/react";
 
 function Example() {
-  const { copy, copied, error } = useCopyToClipboard({
-    timeout: 1500,
-    clearAfter: 1000,
-  });
-
+  const { copy, copied, error } = useCopyToClipboard({ timeout: 1500, clearAfter: 1000 });
   return (
-    <button onClick={() => copy("Secret API Key")}>
-      {copied ? "Copied!" : "Copy"}
-    </button>
+    <button onClick={() => copy("Secret API Key")}>{copied ? "Copied!" : "Copy"}</button>
   );
 }
 ```
 
-### What you get
-
-- `copy(text)` → Promise<CopyResult>
-- `copied` → auto-resets after timeout
-- `error` → structured failure info
-- `reset()` → manually reset state
+`copy(text)` → `Promise<CopyResult>` · `copied` / `error` / `reset()`
 
 ---
 
-## Component Wrapper
+## Component
 
 ```tsx
 import { CopyToClipboard } from "react-copy-to-clipboard-lite/react";
 
-<CopyToClipboard
-  text="Copy this value"
-  onSuccess={() => console.log("Success")}
-  onError={(r) => console.log(r.code)}
->
+<CopyToClipboard text="Copy this" onSuccess={() => {}} onError={(r) => console.log(r.code)}>
   <button>Copy</button>
 </CopyToClipboard>
 ```
 
-✔ Preserves your original `onClick`  
-✔ Works with custom components  
-✔ Works with spans, buttons, links  
+Preserves your `onClick`; works with buttons, spans, links.
 
 ---
 
-## React 19 Action Support
+## React 19 Action
 
 ```tsx
 import { copyToClipboardAction } from "react-copy-to-clipboard-lite/react";
 
 <form>
   <input name="text" defaultValue="Hello" />
-  <button formAction={copyToClipboardAction}>
-    Copy
-  </button>
+  <button formAction={copyToClipboardAction}>Copy</button>
 </form>
 ```
 
-Fully compatible with:
-
-- `useActionState`
-- Server Components (client boundary required)
-- Progressive enhancement
+Works with `useActionState` and Server Components (client boundary).
 
 ---
 
-## Structured Result Metadata
+## CopyResult
 
 ```ts
 type CopyResult = {
   success: boolean;
-  method:
-    | "clipboard-api"
-    | "exec-command"
-    | "unsupported"
-    | "failed";
-  code?:
-    | "SECURITY_ERROR"
-    | "PERMISSION_DENIED"
-    | "INSECURE_CONTEXT"
-    | "NO_BROWSER_SUPPORT"
-    | "UNKNOWN";
+  method: "clipboard-api" | "exec-command" | "unsupported" | "failed";
+  code?: "SECURITY_ERROR" | "PERMISSION_DENIED" | "INSECURE_CONTEXT" | "NO_BROWSER_SUPPORT" | "UNKNOWN";
   error?: unknown;
 };
 ```
 
-You always get a result object.  
-It never throws.
-
 ---
 
-## Secret Mode (clearAfter)
+## clearAfter (e.g. passwords)
 
 ```ts
-copyToClipboard("my-password", {
-  clearAfter: 3000,
-});
+copyToClipboard("my-password", { clearAfter: 3000 });
 ```
 
-✔ Clears clipboard after X ms  
-✔ Best-effort only  
-✔ Never reads clipboard  
-✔ Does not flip success if clear fails  
-
-Great for password managers, API keys, tokens.
+Clears clipboard after X ms (best-effort). Never reads clipboard.
 
 ---
 
-## Permission Awareness
+## Behaviour
 
-- Uses `navigator.permissions.query()` when available
-- Skips Clipboard API if denied
-- Never prompts the user
-- Falls back automatically
-
----
-
-## SSR Safe
-
-All browser APIs are accessed lazily inside functions.
-
-Safe in:
-
-- Next.js
-- Remix
-- Vite SSR
-- Astro
-- RSC environments
+- **Permission-aware:** uses `navigator.permissions.query()` when available; never prompts.
+- **SSR-safe:** browser APIs used only inside functions. Works in Next.js, Remix, Vite SSR, Astro, RSC.
+- **Size:** CI enforces &lt; 2 KB (index), &lt; 3 KB (react); brotli.
 
 ---
 
-## Bundle Size
+## Browser support
 
-Designed to stay tiny.
+| Clipboard API | execCommand fallback | IE11 |
+|---------------|----------------------|------|
+| Modern        | Safari / legacy      | No   |
 
-CI enforces:
-
-- `dist/index.mjs` < 2 KB
-- `dist/react.mjs` < 3 KB
-
-Measured with brotli compression.
-
----
-
-## Browser Support
-
-| Feature | Support |
-|---------|---------|
-| Async Clipboard API | Modern browsers |
-| execCommand fallback | Safari / legacy |
-| SSR guard | Yes |
-| IE11 | ❌ Not supported |
-
-No `prompt()` fallback.  
-No clipboard-read.
-
----
-
-
-## Architecture Overview
-
-```
-Clipboard API (secure)
-        ↓
-execCommand fallback
-        ↓
-Unsupported
-```
-
-Zero dependencies.  
-Native TypeScript.  
-Strict return contract.
-
-Full architecture doc:
-`docs/DEV-ARCHITECTURE.md`
-
----
-
-## Testing & Quality
-
-- ✅ 95%+ unit coverage (Vitest)
-- ✅ Cross-browser E2E (Chromium, Firefox, WebKit)
-- ✅ Bundle size gate
-- ✅ Trusted Publishing (OIDC)
-- ✅ Strict TS
-- ✅ No side effects
+No `prompt()` fallback; no clipboard-read.
 
 ---
 
 ## Comparison
 
-| Feature | This Library | Typical Clipboard Lib |
-|---------|--------------|------------------------|
-| Zero dependencies | ✅ | ❌ |
-| SSR safe | ✅ | ⚠️ |
-| Structured result | ✅ | ❌ |
-| React 19 Actions | ✅ | ❌ |
-| Permission-aware | ✅ | ❌ |
-| Size-gated CI | ✅ | ❌ |
+| Feature           | This lib | Typical |
+|-------------------|----------|---------|
+| Zero deps         | Yes      | No      |
+| SSR safe          | Yes      | Often   |
+| Structured result | Yes      | No      |
+| React 19 Actions  | Yes      | No      |
+| Permission-aware  | Yes      | No      |
 
 ---
 
-## Migration
-
-From older `react-copy-to-clipboard`:
+## Migration from react-copy-to-clipboard
 
 ```diff
 - import { CopyToClipboard } from "react-copy-to-clipboard"
 + import { CopyToClipboard } from "react-copy-to-clipboard-lite/react"
 ```
 
-Modernized.  
-Typed.  
-Smaller.
-
 ---
 
 ## Contributing
 
-PRs welcome.
-
-Before submitting:
-
-```bash
-npm run test:all
-```
-
-Must pass:
-
-- Typecheck
-- Unit tests
-- Playwright
-- Size limit
+PRs welcome. Before submitting: `npm run test:all` (typecheck, unit, Playwright, size).
 
 ---
 
