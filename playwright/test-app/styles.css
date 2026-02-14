@@ -1,0 +1,143 @@
+:root {
+  --bg: #f8fafc;
+  --card-bg: #ffffff;
+  --border: #e5e7eb;
+  --text: #0f172a;
+  --muted: #64748b;
+
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-soft: #dbeafe;
+
+  --success: #10b981;
+  --success-soft: #d1fae5;
+
+  --radius: 14px;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  font-family: "Inter", sans-serif;
+  color: var(--text);
+}
+
+main {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 60px 24px;
+}
+
+header.hero {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+header.hero h1 {
+  font-size: 40px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+header.hero p {
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+
+section {
+  background: var(--card-bg);
+  padding: 32px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-bottom: 32px;
+  box-shadow: var(--shadow);
+}
+
+h2 {
+  margin-top: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+h3 {
+  margin-top: 24px;
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+button {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+button:hover {
+  background: var(--primary-hover);
+}
+
+button:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+}
+
+input,
+textarea {
+  border: 1px solid var(--border);
+  padding: 10px;
+  border-radius: 10px;
+  width: 100%;
+  margin-bottom: 12px;
+  font-family: inherit;
+}
+
+pre,
+.code-block {
+  background: #0f172a;
+  color: #f8fafc;
+  padding: 16px;
+  border-radius: 12px;
+  overflow-x: auto;
+  font-size: 14px;
+}
+
+.success-badge {
+  background: var(--success-soft);
+  color: var(--success);
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.example-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+@media (max-width: 640px) {
+  main {
+    padding: 32px 16px;
+  }
+
+  section {
+    padding: 20px;
+  }
+}
