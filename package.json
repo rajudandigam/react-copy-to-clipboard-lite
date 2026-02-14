@@ -1,6 +1,6 @@
 {
   "name": "react-copy-to-clipboard-lite",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": false,
   "description": "Tiny, modern React 19+ clipboard utility with tiered fallback and metadata.",
   "license": "MIT",
