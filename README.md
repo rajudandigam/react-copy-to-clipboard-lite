@@ -1,6 +1,6 @@
 # react-copy-to-clipboard-lite
 
-> Tiny, modern, dependency-free clipboard utility for React 19+  
+> Tiny, modern, dependency-free clipboard utility for React 18+  
 > Secure. SSR-safe. Permission-aware. Fully tested. MIT.
 
 [![CI](https://github.com/rajudandigam/react-copy-to-clipboard-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/rajudandigam/react-copy-to-clipboard-lite/actions)
@@ -238,6 +238,10 @@ No clipboard-read.
 ---
 
 ## Real Demo Examples
+
+**[→ Live demo](https://react-copy-to-clipboard-lite.vercel.app/)**
+
+![Demo preview](docs/demo-preview.png)
 
 The repository includes a full demo app covering:
 
