@@ -7,7 +7,7 @@ export default defineConfig({
   timeout: 30_000,
   expect: { timeout: 5_000 },
   webServer: {
-    command: "npm run dev:test-app",
+    command: "npm run dev:demo",
     url: "http://localhost:5173",
     reuseExistingServer: !process.env.CI,
   },

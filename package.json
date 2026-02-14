@@ -49,7 +49,7 @@
     "lint": "eslint . --ext .ts,.tsx",
     "prepublishOnly": "npm run build",
     "test:pw": "playwright test --config playwright/playwright.config.ts",
-    "dev:test-app": "vite --config playwright/test-app/vite.config.ts"
+    "dev:demo": "vite --config demo/vite.config.ts"
   },
   "keywords": [
     "react",
