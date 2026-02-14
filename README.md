@@ -60,6 +60,32 @@ react >= 18
 
 ---
 
+## Real Demo Examples
+
+**<a href="https://react-copy-to-clipboard-lite.vercel.app/" target="_blank" rel="noopener noreferrer">→ Live demo</a>**
+
+![Demo preview](docs/demo-preview.png)
+
+The repository includes a full demo app covering:
+
+- Imperative copy
+- Copy from input
+- Multiline text
+- Temporary success UI
+- clearAfter
+- Custom components
+- React 19 actions
+- Error handling
+- Fallback in insecure contexts
+
+Run locally:
+
+```bash
+npm run dev:demo
+```
+
+---
+
 ## Core Usage (Framework Agnostic)
 
 ```ts
@@ -237,31 +263,6 @@ No clipboard-read.
 
 ---
 
-## Real Demo Examples
-
-**<a href="https://react-copy-to-clipboard-lite.vercel.app/" target="_blank" rel="noopener noreferrer">→ Live demo</a>**
-
-![Demo preview](docs/demo-preview.png)
-
-The repository includes a full demo app covering:
-
-- Imperative copy
-- Copy from input
-- Multiline text
-- Temporary success UI
-- clearAfter
-- Custom components
-- React 19 actions
-- Error handling
-- Fallback in insecure contexts
-
-Run locally:
-
-```bash
-npm run dev:demo
-```
-
----
 
 ## Architecture Overview
 
