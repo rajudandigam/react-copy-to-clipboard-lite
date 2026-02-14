@@ -64,7 +64,8 @@
     "check:bundle": "grep -q \"react\" dist/core.mjs && echo \"⚠ React found in core bundle\" && exit 1 || echo \"Bundle clean\"",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "changeset publish"
+    "release": "changeset publish",
+    "publish": "npm publish --access public --provenance"
   },
   "size-limit": [
     {

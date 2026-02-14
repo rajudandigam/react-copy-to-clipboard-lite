@@ -17,7 +17,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      id-token: write   # 🔥 REQUIRED FOR OIDC
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4
@@ -31,9 +31,10 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      - uses: changesets/action@v1
+      - name: Create Release PR or Publish
+        uses: changesets/action@v1
         with:
-          publish: npm run release
+          publish: npm publish --access public --provenance
           commit: "chore: release"
           title: "chore: release"
         env:
