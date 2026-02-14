@@ -9,11 +9,11 @@ export default defineConfig({
     alias: [
       {
         find: "react-copy-to-clipboard-lite/react",
-        replacement: path.resolve(__dirname, "../../dist/react.mjs"),
+        replacement: path.resolve(__dirname, "../dist/react.mjs"),
       },
       {
         find: "react-copy-to-clipboard-lite",
-        replacement: path.resolve(__dirname, "../../dist/index.mjs"),
+        replacement: path.resolve(__dirname, "../dist/index.mjs"),
       },
     ],
   },
