@@ -70,16 +70,28 @@ function App() {
           </button>
           <span
             data-testid="copied-state"
+            className="sr-only"
             aria-live="polite"
             aria-atomic="true"
           >
             {String(copied)}
           </span>
-          {lastHookResult != null && (
-            <span data-testid="hook-method">{lastHookResult.method}</span>
+          {lastCopiedSource === "simple" && copied && (
+            <span className="success-badge">Copied</span>
           )}
-          <button type="button" data-testid="reset-btn" onClick={reset}>
-            Reset
+          {lastHookResult != null && (
+            <span data-testid="hook-method" className="muted" style={{ fontSize: "12px" }}>
+              {lastHookResult.method}
+            </span>
+          )}
+          <button
+            type="button"
+            data-testid="reset-btn"
+            className="secondary"
+            onClick={reset}
+            title="Clear copied state without waiting for timeout"
+          >
+            Clear state
           </button>
         </div>
 
@@ -157,12 +169,23 @@ function App() {
           Copy via index
         </button>
         {lastResult && (
-          <div>
-            <span data-testid="index-copy-result">
+          <div className="example-row">
+            <span
+              data-testid="index-copy-result"
+              className="sr-only"
+            >
               {String(lastResult.success)}
-            </span>{" "}
-            —
-            <span data-testid="index-copy-method">{lastResult.method}</span>
+            </span>
+            {lastResult.success && (
+              <span className="success-badge">Copied</span>
+            )}
+            <span
+              data-testid="index-copy-method"
+              className="muted"
+              style={{ fontSize: "12px" }}
+            >
+              {lastResult.method}
+            </span>
           </div>
         )}
 
@@ -266,12 +289,23 @@ function App() {
         </form>
 
         {actionResult && (
-          <div data-testid="action-metadata">
-            <span data-testid="action-result">
+          <div data-testid="action-metadata" className="example-row">
+            <span
+              data-testid="action-result"
+              className="sr-only"
+            >
               {String(actionResult.success)}
-            </span>{" "}
-            —
-            <span data-testid="action-method">{actionResult.method}</span>
+            </span>
+            {actionResult.success && (
+              <span className="success-badge">Copied</span>
+            )}
+            <span
+              data-testid="action-method"
+              className="muted"
+              style={{ fontSize: "12px" }}
+            >
+              {actionResult.method}
+            </span>
           </div>
         )}
       </section>
