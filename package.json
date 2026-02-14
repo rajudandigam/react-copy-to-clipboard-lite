@@ -1,6 +1,6 @@
 {
   "name": "react-copy-to-clipboard-lite",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": false,
   "description": "Tiny, modern React 19+ clipboard utility with tiered fallback and metadata.",
   "license": "MIT",
@@ -62,7 +62,6 @@
     "build:demo": "npm run build && vite build --config demo/vite.config.ts",
     "size": "size-limit",
     "check:bundle": "grep -q \"react\" dist/core.mjs && echo \"⚠ React found in core bundle\" && exit 1 || echo \"Bundle clean\"",
-  
     "publish": "npm publish --access public --provenance"
   },
   "size-limit": [
