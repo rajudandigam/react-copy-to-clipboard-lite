@@ -1,8 +1,6 @@
 # react-copy-to-clipboard-lite
 
-> Tiny, dependency-free clipboard utility for React 18+. SSR-safe. Permission-aware. MIT.
-
-**~1.1 kB** (core & React entry, brotli). Size-gated in CI.
+> Tiny(~1.1 kB), dependency-free clipboard utility for React 18+. SSR-safe. Permission-aware. MIT.
 
 [![CI](https://github.com/rajudandigam/react-copy-to-clipboard-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/rajudandigam/react-copy-to-clipboard-lite/actions)
 [![Size](https://img.shields.io/bundlephobia/minzip/react-copy-to-clipboard-lite)](https://bundlephobia.com/package/react-copy-to-clipboard-lite)
@@ -16,7 +14,7 @@
 - Structured `CopyResult`, never throws
 - Permission-aware (no `prompt()`), SSR-safe
 - React 19 `formAction` / `useActionState` support
-- TypeScript strict, size-gated in CI
+- TypeScript strict, size-gated in CI, Unit + E2E coverage
 
 ---
 
