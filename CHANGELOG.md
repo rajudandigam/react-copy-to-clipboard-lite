@@ -1,5 +1,13 @@
 # react-copy-to-clipboard-lite
 
+## 1.0.3
+
+### Patch Changes
+
+- [`291d69b`](https://github.com/rajudandigam/react-copy-to-clipboard-lite/commit/291d69b558daee9a5f539b1e8efa467d23d7f423) Thanks [@rajudandigam](https://github.com/rajudandigam)! - updated readme file with size and tests info
+
+- [`8081b21`](https://github.com/rajudandigam/react-copy-to-clipboard-lite/commit/8081b21dfa26aac5dfb7887ccb69f6e726e881ad) Thanks [@rajudandigam](https://github.com/rajudandigam)! - Added library size in the readme file
+
 ## 1.0.2
 
 ### Patch Changes
