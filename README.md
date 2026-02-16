@@ -2,6 +2,8 @@
 
 > Tiny, dependency-free clipboard utility for React 18+. SSR-safe. Permission-aware. MIT.
 
+**~1.1 kB** (core & React entry, brotli). Size-gated in CI.
+
 [![CI](https://github.com/rajudandigam/react-copy-to-clipboard-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/rajudandigam/react-copy-to-clipboard-lite/actions)
 [![Size](https://img.shields.io/bundlephobia/minzip/react-copy-to-clipboard-lite)](https://bundlephobia.com/package/react-copy-to-clipboard-lite)
 [![License](https://img.shields.io/npm/l/react-copy-to-clipboard-lite)](LICENSE)
