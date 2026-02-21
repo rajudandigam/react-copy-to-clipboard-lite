@@ -153,3 +153,10 @@ playwright-report/
 test-results/
 blob-report/
 playwright/.cache/
+
+# Local / uncommitted
+.cursor/
+.cursorrules
+.cursorrules*
+docs/DEV-ARCHITECTURE.md
+docs/NPM-LIBRARY-TEMPLATE.md
